@@ -30,5 +30,15 @@ export const registerUser = async (user) => {
       throw new Error(error.response?.data?.message || 'Đã xảy ra lỗi');
     }
   };
+
+  export const getTransport=async()=>{
+    try {
+      const API_URL = `${API_BASE_URL}/getTransport`;
+      const response = await axios.get(API_URL);
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
   
   

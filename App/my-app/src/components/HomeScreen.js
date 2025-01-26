@@ -1,143 +1,134 @@
 import * as React from 'react';
-import  {View,StyleSheet,Image,Text,TouchableOpacity,TextInput,FlatList} from 'react-native';
+import { View, StyleSheet, Image, Text, TouchableOpacity, TextInput, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {PRIMARYCOLOR,PRIMARYBORDERADIUS} from '../../Constants.js';
+import { PRIMARYCOLOR } from '../../Constants.js';
 import { Ionicons } from '@expo/vector-icons';
-import {CustomCard} from './CustomCard';
-import bus from '../../assets/images/bus.png';
-import mrt from '../../assets/images/mrt.jpg';
+import { CustomCard } from './CustomCard';
 import { useRoute } from '@react-navigation/native';
+import { getTransport } from '../services/api.js';
 
+import bus from '../../assets/images/bus.png'
+import mrt from '../../assets/images/mrt.jpg'
 export const HomeScreen = () => {
   const nav = useNavigation();
   const route = useRoute();
   const username = route.params?.username
-  const DATA = [
-    {
-      id: 1,
-      name: "Bus",
-      backgroundColor:"#6BC5E8",
-      imagesrc:bus,
-      onPressHandler:()=>{
-        nav.navigate("schedule",{title:"Bus",imagesrc:bus,backgroundColor:"#6BC5E8"});
+  console.log(username)
+  const [transportData, setTransportData] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Fetch transport data from server
+    const fetchTransportData = async () => {
+      try {
+        const data = await getTransport();
+        setTransportData(data);
+      } catch (error) {
+        console.error('Failed to fetch transport data:', error);
+      } finally {
+        setLoading(false);
       }
-    },
-    {
-      id: 2,
-      name: "MRT",
-      backgroundColor:"#3A9EC2",
-      imagesrc:mrt,
-      onPressHandler:()=>{
-        nav.navigate("schedule",{title:"MRT",imagesrc:mrt,backgroundColor:"#3A9EC2"});
+    };
+
+    fetchTransportData();
+  }, []);
+
+  const transportItem = ({ item }) => {
+    // Conditional rendering logic for bus image
+    const renderImage = () => {
+      if (item.name === "Bus") {
+        return <Image style={{ position: "absolute", right: -15, bottom: 2 }} source={bus} />;
       }
-    }
-  ];
-  const transportItem = ({item}) => {
-    return (<CustomCard >
-              <View style={{flexDirection:"row",overflow:"hidden",justifyContent:"space-between",padding:15,backgroundColor:item.backgroundColor,marginHorizontal:26,marginBottom:10,borderRadius:10}}>
-                <View style={{justifyContent:"space-between"}}>
-                  <Text style={{color:"#fff",fontWeight:"bold",fontSize:20}}>{item.name}</Text>
-                  <TouchableOpacity style={{backgroundColor:"#fff",width:70,padding:5,borderRadius:6,marginTop:50}} onPress={item.onPressHandler}>
-                    <Text style={{textAlign:"center",fontWeight:"bold"}}>Select</Text>
-                  </TouchableOpacity>
-                </View>
-                <View>
-                  <Image
-                      style={{position:"absolute",right:-15,bottom:2}}
-                      source={item.imagesrc}>
-                  </Image>
-                </View>
-              </View>
-           </CustomCard>);
+      if (item.name === "Mrt") {
+        return <Image style={{ position: "absolute", right: -15, bottom: 2 }} source={mrt} />;
+      }
+      return null; // Return null if no condition matches
+    };
+
+    return (
+      <CustomCard>
+        <View style={styles.card}>
+          <View style={{ justifyContent: 'space-between' }}>
+            <Text style={styles.cardTitle}>{item.name}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() =>
+                nav.navigate('schedule', {
+                  title: item.name,
+                  imagesrc: item.imageSrc, // Ensure the server provides image URLs or paths
+                  backgroundColor: '#6BC5E8', // Customize per transport item
+                })
+              }
+            >
+              <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>Select</Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+          {renderImage()}
+          </View>
+        </View>
+      </CustomCard>
+    );
   };
+
   return (
-          <View style={styles.container}>
-              <View style={styles.topview}>
-                  <View style={styles.welcomecontainer}>
-                  <Text style={styles.welcomemessage}>Hello, {username}</Text>
-                      <View style={styles.circle}></View>
-                  </View>
-                  <Text style={{color:"#fff"}}> Where will you go</Text>
-                  <View style={styles.searchbar}>
-                    <Ionicons name="search-outline" size={25} color="#BEBEBE" style={{width:40,transform: [{rotateY: '180deg'}]}} />
-                    <TextInput placeholder="Search" style={{color:"#BEBEBE",marginLeft:15,opacity:0.5,fontSize:20}}></TextInput>
-                  </View>
-              </View>
-              <View style={styles.bottomview}>
-              <CustomCard elevated={true} style={{backgroundColor:"#fff",marginHorizontal:24,marginTop:-40,padding:30,borderRadius:10,flexDirection:"row",justifyContent:"space-between"}}>
-                  <View style={{alignItems:"center"}}>
-                    <Text style={{fontWeight:"bold", marginBottom:10}}>Balance</Text>
-                    <Text style={{fontWeight:"bold",fontSize:18}}>$ 18</Text>
-                  </View>
-                  <View style={{alignItems:"center"}}>
-                    <Text style={{fontWeight:"bold", marginBottom:10}}>Rewards</Text>
-                    <Text style={{fontWeight:"bold",fontSize:18}}>$ 10.25</Text>
-                  </View>
-                  <View style={{alignItems:"center"}}>
-                    <Text style={{fontWeight:"bold", marginBottom:10}}>Total Trips</Text>
-                    <Text style={{fontWeight:"bold",fontSize:18}}>189</Text>
-                  </View>
-                </CustomCard>
-                <Text style={{marginHorizontal:26,marginVertical:20,fontWeight:"bold",fontSize:20}}>Choose your Transport</Text>
-                <View>
-                    <FlatList
-                    data={DATA}
-                    renderItem={transportItem}
-                    keyExtractor={(item) => item.id}
-                  />
-                </View>
-                <View style={{position:"absolute",bottom:0,width:"100%"}}>
-                  <View style={{flexDirection:"row",justifyContent:"space-between",margin:26,backgroundColor:"#fff"}}>
-                      <Ionicons name="home" size={25} color="#35A2C1"  />
-                      <Ionicons name="person" size={25} color="#BDBEC1"  />
-                      <Ionicons name="location-sharp" size={25} color="#BDBEC1" />
-                  </View>
-                </View>
-                </View>
-          </View>);
-}
+    <View style={styles.container}>
+      <View style={styles.topview}>
+        <View style={styles.welcomecontainer}>
+          <Text style={styles.welcomemessage}>Hello, {username}</Text>
+          <View style={styles.circle}></View>
+        </View>
+        <Text style={{ color: '#fff' }}> Where will you go</Text>
+        <View style={styles.searchbar}>
+          <Ionicons name="search-outline" size={25} color="#BEBEBE" style={{ width: 40, transform: [{ rotateY: '180deg' }] }} />
+          <TextInput placeholder="Search" style={styles.searchInput}></TextInput>
+        </View>
+      </View>
+      <View style={styles.bottomview}>
+        <CustomCard elevated={true} style={styles.balanceCard}>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.cardInfoTitle}>Balance</Text>
+            <Text style={styles.cardInfoValue}>$ 18</Text>
+          </View>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.cardInfoTitle}>Rewards</Text>
+            <Text style={styles.cardInfoValue}>$ 10.25</Text>
+          </View>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.cardInfoTitle}>Total Trips</Text>
+            <Text style={styles.cardInfoValue}>189</Text>
+          </View>
+        </CustomCard>
+        <Text style={styles.transportHeader}>Choose your Transport</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color={PRIMARYCOLOR} style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={transportData}
+            renderItem={transportItem}
+            keyExtractor={(item) => item._id} // Use unique ID from server
+          />
+        )}
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  topview:{
-    marginTop:60,
-    marginHorizontal:24,
-    backgroundColor:PRIMARYCOLOR,
-    flex:1,
-    justifyContent:"space-between"
-  },
-  welcomemessage:{
-    color:"#fff",
-    fontSize:35,
-    fontWeight:"bold"
-  },
-  searchbar:{
-    flexDirection:"row",
-    backgroundColor:"#fff",
-    alignItems:"center",
-    width:"100%",
-    height:40,
-    borderRadius:10,
-    marginBottom:65
-  },
-  circle:{
-    borderRadius:25,
-    height:50,
-    width:50,
-    backgroundColor:"#fff"
-  },
-  welcomecontainer:{
-    flexDirection:"row",
-    justifyContent:"space-between",
-    alignItems:"center"
-  },
-  bottomview:{
-    flex:2,
-    backgroundColor:"#fff",
-    borderTopLeftRadius:50,
-    borderTopRightRadius:50,
-  },
-  container: {
-    flex:1,
-    backgroundColor:PRIMARYCOLOR,
-  },
+  container: { flex: 1, backgroundColor: PRIMARYCOLOR },
+  topview: { marginTop: 60, marginHorizontal: 24, backgroundColor: PRIMARYCOLOR, flex: 1, justifyContent: 'space-between' },
+  welcomemessage: { color: '#fff', fontSize: 35, fontWeight: 'bold' },
+  searchbar: { flexDirection: 'row', backgroundColor: '#fff', alignItems: 'center', width: '100%', height: 40, borderRadius: 10, marginBottom: 65 },
+  searchInput: { color: '#BEBEBE', marginLeft: 15, opacity: 0.5, fontSize: 20 },
+  circle: { borderRadius: 25, height: 50, width: 50, backgroundColor: '#fff' },
+  welcomecontainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bottomview: { flex: 2, backgroundColor: '#fff', borderTopLeftRadius: 50, borderTopRightRadius: 50 },
+  balanceCard: { backgroundColor: '#fff', marginHorizontal: 24, marginTop: -40, padding: 30, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between' },
+  cardInfoTitle: { fontWeight: 'bold', marginBottom: 10 },
+  cardInfoValue: { fontWeight: 'bold', fontSize: 18 },
+  transportHeader: { marginHorizontal: 26, marginVertical: 20, fontWeight: 'bold', fontSize: 20 },
+  card: { flexDirection: 'row', overflow: 'hidden', justifyContent: 'space-between', padding: 15, backgroundColor: '#6BC5E8', marginHorizontal: 26, marginBottom: 10, borderRadius: 10 },
+  cardTitle: { color: '#fff', fontWeight: 'bold', fontSize: 20 },
+  selectButton: { backgroundColor: '#fff', width: 70, padding: 5, borderRadius: 6, marginTop: 50 },
+  image: { position: 'absolute', right: -15, bottom: 2, width: 50, height: 50 },
 });
