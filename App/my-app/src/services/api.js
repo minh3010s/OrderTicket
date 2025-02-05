@@ -37,7 +37,17 @@ export const registerUser = async (user) => {
       const response = await axios.get(API_URL);
       return response.data;
     } catch (error) {
-      
+      throw new Error(error.response?.data?.message || 'Đã xảy ra lỗi');
+    }
+  };
+
+  export const getPlace=async()=>{
+    try {
+      const API_URL = `${API_BASE_URL}/getPlace`;
+      const response = await axios.get(API_URL);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Đã xảy ra lỗi');
     }
   }
   

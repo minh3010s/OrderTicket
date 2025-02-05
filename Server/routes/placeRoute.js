@@ -13,4 +13,14 @@ placeRouter.post("/addPlace",(req,res)=>{
         console.log(error)
     }
 })
+
+//get all place
+placeRouter.get("/getPlace",async(req,res)=>{
+    try {
+       const place=await Place.find();
+       res.status(200).json(place)
+    } catch (error) {
+        console.log(error)
+    }
+})
 module.exports=placeRouter;
