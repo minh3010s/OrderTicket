@@ -4,12 +4,16 @@ import { useNavigation , useRoute} from '@react-navigation/native';
 import {PRIMARYCOLOR,PRIMARYBORDERADIUS} from '../../Constants.js';
 import { Ionicons } from '@expo/vector-icons';
 import {CustomCard} from './CustomCard';
+import { FontAwesome } from 'react-native-vector-icons';
 import bus from '../../assets/images/bus.png';
 import mrt from '../../assets/images/mrt.jpg';
 import {FromTo} from './FromTo';
 export const ScheduleScreen = () => {
 
   const nav = useNavigation();
+  const handleBackToHome=()=>{
+    nav.navigate('home');
+  }
   const route = useRoute();
   const params = route.params;
   const DATA = [
@@ -69,7 +73,11 @@ export const ScheduleScreen = () => {
                       source={params.imagesrc}>
                   </Image>
               </View>
+              
               <View style={styles.bottomview}>
+              <TouchableOpacity onPress={handleBackToHome} style={styles.backButton}>
+              <FontAwesome name="arrow-left" size={24} color="black" />
+            </TouchableOpacity>
               <CustomCard elevated={true} style={{backgroundColor:"#fff",marginHorizontal:24,marginTop:30,padding:10,borderRadius:10,flexDirection:"row",justifyContent:"space-between"}}>
                 <FromTo backgroundColor={params.backgroundColor} />
                 </CustomCard>
@@ -100,6 +108,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius:50,
     marginTop:20,
     borderTopRightRadius:50,
+  },
+  backButton:{
+    marginLeft:20,
+    marginTop:10
   },
   container: {
     flex:1,
