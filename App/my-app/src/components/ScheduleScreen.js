@@ -8,14 +8,26 @@ import { FontAwesome } from 'react-native-vector-icons';
 import bus from '../../assets/images/bus.png';
 import mrt from '../../assets/images/mrt.jpg';
 import {FromTo} from './FromTo';
-export const ScheduleScreen = () => {
 
+export const ScheduleScreen = () => {
   const nav = useNavigation();
-  const handleBackToHome=()=>{
-    nav.navigate('home');
-  }
   const route = useRoute();
   const params = route.params;
+
+  const [selectedFrom, setSelectedFrom] = React.useState('');
+  const [selectedTo, setSelectedTo] = React.useState('');
+  const [showSchedule, setShowSchedule] = React.useState(false);
+  const [isConfirmed, setIsConfirmed] = React.useState(false);
+
+  const handleBackToHome = () => {
+    nav.navigate('home');
+  };
+
+  // Nhận giá trị từ FromTo
+  const handleSelectionChange = (from, to) => {
+    setSelectedFrom(from);
+    setSelectedTo(to);
+  };
   const DATA = [
     {
       id: 1,
@@ -66,32 +78,66 @@ export const ScheduleScreen = () => {
            );
   };
   return (
-          <View style={[styles.container,{backgroundColor:params.backgroundColor}]}>
-              <View style={[styles.topview,{backgroundColor:params.backgroundColor,marginBottom:20}]}>
-                 <Text style={{position:"absolute",top:5,textAlign:"center",fontSize:30,color:"#fff",fontWeight:"bold"}}>{params.title}</Text>
-                  <Image
-                      source={params.imagesrc}>
-                  </Image>
-              </View>
-              
-              <View style={styles.bottomview}>
-              <TouchableOpacity onPress={handleBackToHome} style={styles.backButton}>
-              <FontAwesome name="arrow-left" size={24} color="black" />
-            </TouchableOpacity>
-              <CustomCard elevated={true} style={{backgroundColor:"#fff",marginHorizontal:24,marginTop:30,padding:10,borderRadius:10,flexDirection:"row",justifyContent:"space-between"}}>
-                <FromTo backgroundColor={params.backgroundColor} />
-                </CustomCard>
-                <Text style={{marginHorizontal:26,marginVertical:20,fontWeight:"bold",fontSize:20}}>Choose Schedule</Text>
-                <View>
-                    <FlatList
-                    data={DATA}
-                    renderItem={scheduleItem}
-                    keyExtractor={(item) => item.id}
-                  />
-                </View>
-                </View>
-          </View>);
-}
+    <View style={[styles.container, { backgroundColor: params.backgroundColor }]}>
+      <View style={[styles.topview, { backgroundColor: params.backgroundColor, marginBottom: 20 }]}>
+        <Text style={{ position: 'absolute', top: 5, textAlign: 'center', fontSize: 30, color: '#fff', fontWeight: 'bold' }}>
+          {params.title}
+        </Text>
+        <Image source={params.imagesrc} />
+      </View>
+
+      <View style={styles.bottomview}>
+        <TouchableOpacity onPress={handleBackToHome} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={24} color="black" />
+        </TouchableOpacity>
+
+        <CustomCard elevated={true} style={{ backgroundColor: '#fff', marginHorizontal: 24, marginTop: 30, padding: 10, borderRadius: 10 }}>
+        <FromTo 
+  backgroundColor={params.backgroundColor} 
+  onSelectionChange={handleSelectionChange} 
+  isConfirmed={isConfirmed} 
+/>
+        </CustomCard>
+
+        {/* Nút Confirm */}
+        {selectedFrom && selectedTo && !showSchedule && (
+         <TouchableOpacity
+         onPress={() => {
+           setShowSchedule(true);
+           setIsConfirmed(true); // Vô hiệu hóa FromTo
+         }}
+         disabled={isConfirmed} // Tránh nhấn nhiều lần
+         style={{
+           backgroundColor: params.backgroundColor,
+           padding: 10,
+           marginHorizontal: 24,
+           marginTop: 20,
+           borderRadius: 10,
+           alignItems: 'center',
+           opacity: isConfirmed ? 0.6 : 1, // Làm mờ khi disable
+         }}>
+         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Confirm</Text>
+       </TouchableOpacity>
+       
+        )}
+
+
+        {/* Chỉ hiển thị danh sách khi đã Confirm */}
+        {showSchedule && (
+          <>
+            <Text style={{ marginHorizontal: 26, marginVertical: 20, fontWeight: 'bold', fontSize: 20 }}>Choose Schedule</Text>
+            <FlatList
+              data={DATA}
+              renderItem={scheduleItem}
+              keyExtractor={(item) => item.id.toString()}
+            />
+          </>
+        )}
+      </View>
+    </View>
+  );
+};
+
 
 const styles = StyleSheet.create({
   topview:{
