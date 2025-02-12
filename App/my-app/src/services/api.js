@@ -49,6 +49,17 @@ export const registerUser = async (user) => {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Đã xảy ra lỗi');
     }
-  }
+  };
+
+  export const getScheduleByPlace = async (to) => {
+    try {
+        const API_URL = `${API_BASE_URL}/schedule/${to}`;  
+        const response = await axios.get(API_URL);
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Đã xảy ra lỗi');
+    }
+};
+
   
   

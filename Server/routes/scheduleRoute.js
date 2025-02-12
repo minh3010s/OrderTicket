@@ -75,4 +75,18 @@ scheduleRouter.post("/addSchedule", async (req, res) => {
     }
 });
 
+
+//get schedule by place
+scheduleRouter.get('/schedule/:to',async(req,res)=>{
+    try {
+        const to=req.params.to;
+        const scheduleList=await Schedule.find().populate('to');
+        console.log(scheduleList)
+        const scheduleFilter=scheduleList.filter(schedules=>schedules.to.name===to)
+        console.log(scheduleFilter)
+        return res.status(200).json(scheduleFilter)
+    } catch (error) {
+        return res.status(500).json({ message: "Điểm đến không tồn tại", error });
+    }
+})
 module.exports = scheduleRouter;

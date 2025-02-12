@@ -1,13 +1,11 @@
 import * as React from 'react';
-import  {View,StyleSheet,Image,Text,TouchableOpacity,TextInput,FlatList} from 'react-native';
-import { useNavigation , useRoute} from '@react-navigation/native';
-import {PRIMARYCOLOR,PRIMARYBORDERADIUS} from '../../Constants.js';
+import { View, StyleSheet, Image, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import {CustomCard} from './CustomCard';
 import { FontAwesome } from 'react-native-vector-icons';
-import bus from '../../assets/images/bus.png';
-import mrt from '../../assets/images/mrt.jpg';
-import {FromTo} from './FromTo';
+import { CustomCard } from './CustomCard';
+import { FromTo } from './FromTo';
+import axios from 'axios';
 
 export const ScheduleScreen = () => {
   const nav = useNavigation();
@@ -18,6 +16,8 @@ export const ScheduleScreen = () => {
   const [selectedTo, setSelectedTo] = React.useState('');
   const [showSchedule, setShowSchedule] = React.useState(false);
   const [isConfirmed, setIsConfirmed] = React.useState(false);
+  const [scheduleData, setScheduleData] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const handleBackToHome = () => {
     nav.navigate('home');
@@ -28,61 +28,62 @@ export const ScheduleScreen = () => {
     setSelectedFrom(from);
     setSelectedTo(to);
   };
-  const DATA = [
-    {
-      id: 1,
-      departuretime: "10:00",
-      arrivaltime:"10:30",
-      name:"Lorem MRT Station",
-      price:"5.0",
-      onPressHandler:()=>{
-        nav.navigate("payment",{price:"5.0"});
+
+  // Fetch lịch trình từ API khi người dùng đã chọn điểm đến
+  React.useEffect(() => {
+    if (!selectedTo) return; // Không gọi API nếu chưa chọn điểm đến
+
+    const fetchScheduleData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`http://localhost:1010/api/schedule/${selectedTo}`);
+        setScheduleData(response.data); // Đảm bảo lấy đúng dữ liệu
+      } catch (error) {
+        console.error('Failed to fetch schedule data:', error);
+        setScheduleData([]); // Đặt danh sách trống nếu gặp lỗi
+      } finally {
+        setLoading(false);
       }
-    },
-    {
-      id: 2,
-      departuretime: "10:00",
-      arrivaltime:"10:30",
-      name:"Dolor MRT Station",
-      price:"5.0",
-      onPressHandler:()=>{
-        nav.navigate("payment",{price:"5.0"});
-      }
-    }
-  ];
-  const scheduleItem = ({item}) => {
-    return (<View style={{marginBottom:10,borderBottomWidth:2,marginHorizontal:5,borderBottomStartRadius:30,borderBottomEndRadius:10,borderBottomColor:"#EBE7E6"}}>
-              <View style={{flexDirection:"row",marginHorizontal:26,marginBottom:10,justifyContent:"space-between"}}>
-                <View style={{flexDirection:"row"}}>
-                  <Ionicons name="timer-outline" size={15} color="#000"  />
-                  <Text style={{fontSize:15,fontWeight:"bold",marginHorizontal:10}}>{item.departuretime}</Text>
-                  <Ionicons name="swap-horizontal-outline" size={15} color="#000"  />
-                  <Text style={{fontSize:15,fontWeight:"bold",marginHorizontal:10}}>{item.arrivaltime}</Text>
-                </View>
-                <View>
-                  <Text style={{fontWeight:"bold",marginRight:16}}>$ {item.price}</Text>
-                </View>
-              </View>
-              <View style={{flexDirection:"row",marginHorizontal:26,marginBottom:15,justifyContent:"space-between"}}>
-                <View style={{flexDirection:"row"}}>
-                  <Ionicons name="location-outline" size={15} color="#000"  />
-                  <Text style={{fontSize:15,fontWeight:"bold",marginHorizontal:10}}>{item.name}</Text>
-                </View>
-                <View>
-                  <TouchableOpacity onPress={item.onPressHandler} style={{backgroundColor:params.backgroundColor,paddingHorizontal:8,borderRadius:5}}>
-                  <Text style={{color:"#fff",fontWeight:"bold"}}>Select</Text>
-                  </TouchableOpacity>
-                </View>
-              </View> 
-           </View>
-           );
-  };
+    };
+
+    fetchScheduleData();
+  }, [selectedTo]);
+
+  // Hiển thị từng lịch trình
+  const scheduleItem = ({ item }) => (
+    <View style={styles.scheduleItem}>
+      <View style={styles.scheduleRow}>
+      <View style={styles.scheduleTime}>
+          <Ionicons name="timer-outline" size={15} color="#000" />
+          <Text style={styles.scheduleText}>{selectedFrom}</Text>
+          <Ionicons name="swap-horizontal-outline" size={15} color="#000" />
+          <Text style={styles.scheduleText}>{selectedTo}</Text>
+        </View>
+        <View style={styles.scheduleTime}>
+          <Ionicons name="timer-outline" size={15} color="#000" />
+          <Text style={styles.scheduleText}>{item.departuretime}</Text>
+          <Ionicons name="swap-horizontal-outline" size={15} color="#000" />
+          <Text style={styles.scheduleText}>{item.arrivaltime}</Text>
+        </View>
+        <Text style={styles.priceText}>$ {item.price}</Text>
+      </View>
+
+      <View style={styles.scheduleRow}>
+        <View style={styles.scheduleTime}>
+          <Ionicons name="location-outline" size={15} color="#000" />
+          <Text style={styles.scheduleText}>{item.name}</Text>
+        </View>
+        <TouchableOpacity style={[styles.selectButton, { backgroundColor: params.backgroundColor }]}>
+          <Text style={styles.selectText}>Select</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View style={[styles.container, { backgroundColor: params.backgroundColor }]}>
-      <View style={[styles.topview, { backgroundColor: params.backgroundColor, marginBottom: 20 }]}>
-        <Text style={{ position: 'absolute', top: 5, textAlign: 'center', fontSize: 30, color: '#fff', fontWeight: 'bold' }}>
-          {params.title}
-        </Text>
+      <View style={[styles.topview, { backgroundColor: params.backgroundColor }]}>
+        <Text style={styles.title}>{params.title}</Text>
         <Image source={params.imagesrc} />
       </View>
 
@@ -91,46 +92,31 @@ export const ScheduleScreen = () => {
           <FontAwesome name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
 
-        <CustomCard elevated={true} style={{ backgroundColor: '#fff', marginHorizontal: 24, marginTop: 30, padding: 10, borderRadius: 10 }}>
-        <FromTo 
-  backgroundColor={params.backgroundColor} 
-  onSelectionChange={handleSelectionChange} 
-  isConfirmed={isConfirmed} 
-/>
+        <CustomCard elevated={true} style={styles.card}>
+          <FromTo backgroundColor={params.backgroundColor} onSelectionChange={handleSelectionChange} isConfirmed={isConfirmed} />
         </CustomCard>
 
-        {/* Nút Confirm */}
         {selectedFrom && selectedTo && !showSchedule && (
-         <TouchableOpacity
-         onPress={() => {
-           setShowSchedule(true);
-           setIsConfirmed(true); // Vô hiệu hóa FromTo
-         }}
-         disabled={isConfirmed} // Tránh nhấn nhiều lần
-         style={{
-           backgroundColor: params.backgroundColor,
-           padding: 10,
-           marginHorizontal: 24,
-           marginTop: 20,
-           borderRadius: 10,
-           alignItems: 'center',
-           opacity: isConfirmed ? 0.6 : 1, // Làm mờ khi disable
-         }}>
-         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Confirm</Text>
-       </TouchableOpacity>
-       
+          <TouchableOpacity
+            onPress={() => {
+              setShowSchedule(true);
+              setIsConfirmed(true);
+            }}
+            style={[styles.confirmButton, { backgroundColor: params.backgroundColor }]}>
+            <Text style={styles.confirmText}>Confirm</Text>
+          </TouchableOpacity>
         )}
 
-
-        {/* Chỉ hiển thị danh sách khi đã Confirm */}
         {showSchedule && (
           <>
-            <Text style={{ marginHorizontal: 26, marginVertical: 20, fontWeight: 'bold', fontSize: 20 }}>Choose Schedule</Text>
-            <FlatList
-              data={DATA}
-              renderItem={scheduleItem}
-              keyExtractor={(item) => item.id.toString()}
-            />
+            <Text style={styles.chooseScheduleText}>Choose Schedule</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color={params.backgroundColor} />
+            ) : scheduleData.length > 0 ? (
+              <FlatList data={scheduleData} renderItem={scheduleItem} keyExtractor={(item) => item.id} />
+            ) : (
+              <Text style={styles.noScheduleText}>No schedule available</Text>
+            )}
           </>
         )}
       </View>
@@ -138,29 +124,22 @@ export const ScheduleScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  topview:{
-    marginTop:60,
-    marginHorizontal:24,
-    backgroundColor:PRIMARYCOLOR,
-    flex:1,
-    justifyContent:"center",
-    alignItems:"center"
-  },
-  bottomview:{
-    flex:2,
-    backgroundColor:"#fff",
-    borderTopLeftRadius:50,
-    marginTop:20,
-    borderTopRightRadius:50,
-  },
-  backButton:{
-    marginLeft:20,
-    marginTop:10
-  },
-  container: {
-    flex:1,
-    backgroundColor:PRIMARYCOLOR,
-  },
+  container: { flex: 1 },
+  topview: { marginTop: 60, marginHorizontal: 24, flex: 1, justifyContent: "center", alignItems: "center" },
+  title: { position: 'absolute', top: 5, textAlign: 'center', fontSize: 30, color: '#fff', fontWeight: 'bold' },
+  bottomview: { flex: 2, backgroundColor: "#fff", borderTopLeftRadius: 50, marginTop: 20, borderTopRightRadius: 50 },
+  backButton: { marginLeft: 20, marginTop: 10 },
+  card: { backgroundColor: '#fff', marginHorizontal: 24, marginTop: 30, padding: 10, borderRadius: 10 },
+  confirmButton: { padding: 10, marginHorizontal: 24, marginTop: 20, borderRadius: 10, alignItems: 'center' },
+  confirmText: { color: '#fff', fontWeight: 'bold' },
+  chooseScheduleText: { marginHorizontal: 26, marginVertical: 20, fontWeight: 'bold', fontSize: 20 },
+  noScheduleText: { textAlign: 'center', fontSize: 16, color: 'gray', marginVertical: 10 },
+  scheduleItem: { marginBottom: 10, borderBottomWidth: 2, marginHorizontal: 5, borderBottomColor: "#EBE7E6", paddingBottom: 10 },
+  scheduleRow: { flexDirection: "row", marginHorizontal: 26, marginBottom: 10, justifyContent: "space-between" },
+  scheduleTime: { flexDirection: "row" },
+  scheduleText: { fontSize: 15, fontWeight: "bold", marginHorizontal: 10 },
+  priceText: { fontWeight: "bold", marginRight: 16 },
+  selectButton: { paddingHorizontal: 8, borderRadius: 5 },
+  selectText: { color: "#fff", fontWeight: "bold" },
 });

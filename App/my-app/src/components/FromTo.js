@@ -46,9 +46,8 @@ export const FromTo = ({ backgroundColor, onSelectionChange, isConfirmed }) => {
               <Text style={{ opacity: 0.6, fontSize: 15 }}>From</Text>
               <Picker
                 selectedValue={selectedFrom}
-                onValueChange={(itemValue) => setSelectedFrom(itemValue)}
-                style={{ fontWeight: 'bold', fontSize: 15 }}
-                enabled={!isConfirmed}>
+                onValueChange={(itemValue) => setSelectedFrom(itemValue)}  // Sử dụng onChange để cập nhật giá trị
+                style={{ fontWeight: 'bold', fontSize: 15 }}>
                 <Picker.Item label="Select a place" value="" />
                 {fromList.map((place) => (
                   <Picker.Item key={place.id} label={place.name} value={place.name} />
@@ -64,9 +63,8 @@ export const FromTo = ({ backgroundColor, onSelectionChange, isConfirmed }) => {
               <Text style={{ opacity: 0.6, fontSize: 15, marginTop: 10 }}>To</Text>
               <Picker
                 selectedValue={selectedTo}
-                onValueChange={(itemValue) => setSelectedTo(itemValue)}
-                style={{ fontWeight: 'bold', fontSize: 15 }}
-                enabled={!isConfirmed}>
+                onValueChange={(itemValue) => setSelectedTo(itemValue)}  // Sử dụng onChange để cập nhật giá trị
+                style={{ fontWeight: 'bold', fontSize: 15 }}>
                 <Picker.Item label="Select a place" value="" />
                 {toList.map((place) => (
                   <Picker.Item key={place.id} label={place.name} value={place.name} />
@@ -79,3 +77,4 @@ export const FromTo = ({ backgroundColor, onSelectionChange, isConfirmed }) => {
     </View>
   );
 };
+
