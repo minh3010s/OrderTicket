@@ -1,6 +1,6 @@
 import * as React from 'react';
 import  {View,StyleSheet,Image,Text,TouchableOpacity,TextInput} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {PRIMARYCOLOR,PRIMARYBORDERADIUS} from '../../Constants.js';
 import { Ionicons } from '@expo/vector-icons';
 import {CustomCard} from './CustomCard';
@@ -10,7 +10,8 @@ import {FromTo} from './FromTo';
 import SvgQRCode from 'react-native-qrcode-svg';
 
 export const PaymentScreen = () => {
-  
+  const route=useRoute();
+  const nav=useNavigation();
   return (
           <View style={styles.container}>
               <View style={styles.topview}>
@@ -18,22 +19,30 @@ export const PaymentScreen = () => {
               </View>
               <View style={styles.bottomview}>
               <CustomCard elevated={true} style={{backgroundColor:"#fff",marginHorizontal:24,marginTop:-180,padding:30,borderRadius:10}}>
-                  <FromTo />
+             <View style={{ flexDirection: 'row', marginBottom: 15, alignItems: 'center' }}>
+             
+             </View>
                   <View style={{flexDirection:"row",marginTop:10}}>
                     <View>
+                    <View style={{flexDirection:"row",marginTop:15,alignItems:"center"}}>
+                        <Ionicons name="location-sharp" size={15} color="#000"  />
+                        <Text style={{marginLeft:10,fontWeight:"bold"}}>{route.params?.selectedFrom}</Text>
+                        <Ionicons style={{marginLeft:5}}  name="swap-horizontal-outline" size={15} color="#000"  />
+                        <Text style={{marginLeft:5,fontWeight:"bold"}}>{route.params?.selectedTo}</Text>
+                      </View>
                       <View style={{flexDirection:"row",marginTop:15,alignItems:"center"}}>
                         <Ionicons name="timer-outline" size={15} color="#000"  />
-                        <Text style={{marginLeft:10,fontWeight:"bold"}}>10:00</Text>
-                        <Ionicons style={{marginLeft:5}}  name="train" size={15} color="#000"  />
-                        <Text style={{marginLeft:5,fontWeight:"bold"}}>10:30</Text>
+                        <Text style={{marginLeft:10,fontWeight:"bold"}}>{route.params?.departuretime}</Text>
+                        <Ionicons style={{marginLeft:5}}  name="swap-horizontal-outline" size={15} color="#000"  />
+                        <Text style={{marginLeft:5,fontWeight:"bold"}}>{route.params?.arrivaltime}</Text>
                       </View>
                       <View style={{flexDirection:"row",marginTop:15}}>
                         <Ionicons name="location-outline" size={15} color="#000"  />
-                        <Text style={{marginLeft:10,fontWeight:"bold"}}>Lorem MRT Station</Text>
+                        <Text style={{marginLeft:10,fontWeight:"bold"}}>{route.params?.name}</Text>
                       </View>
                       <View style={{flexDirection:"row",marginTop:15}}>
                         <Ionicons name="timer-outline" size={15} color="#000"  />
-                        <Text style={{marginLeft:10,fontWeight:"bold"}}>$ 5.0</Text>
+                        <Text style={{marginLeft:10,fontWeight:"bold"}}>{route.params?.price}</Text>
                       </View>
                     </View>
                     <View style={{ width:50,height:50,marginLeft:10,marginTop:10}}>

@@ -9,16 +9,17 @@ import { getTransport } from '../services/api.js';
 
 import bus from '../../assets/images/bus.png'
 import mrt from '../../assets/images/mrt.jpg'
+
 export const HomeScreen = () => {
   const nav = useNavigation();
   const route = useRoute();
-  const username = route.params?.username
-  console.log(username)
+  const username = route.params?.username;
+  console.log(username);
+
   const [transportData, setTransportData] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Fetch transport data from server
     const fetchTransportData = async () => {
       try {
         const data = await getTransport();
@@ -33,8 +34,7 @@ export const HomeScreen = () => {
     fetchTransportData();
   }, []);
 
-  const transportItem = ({ item }) => {
-    // Conditional rendering logic for bus image
+  const transportItem = ({ item, index }) => {
     const renderImage = () => {
       if (item.name === "Bus") {
         return <Image style={{ position: "absolute", right: -15, bottom: 2 }} source={bus} />;
@@ -42,7 +42,7 @@ export const HomeScreen = () => {
       if (item.name === "Mrt") {
         return <Image style={{ position: "absolute", right: -15, bottom: 2 }} source={mrt} />;
       }
-      return null; // Return null if no condition matches
+      return null;
     };
 
     return (
@@ -55,17 +55,15 @@ export const HomeScreen = () => {
               onPress={() =>
                 nav.navigate('schedule', {
                   title: item.name,
-                  imagesrc: item.imageSrc, // Ensure the server provides image URLs or paths
-                  backgroundColor: '#6BC5E8', // Customize per transport item
+                  imagesrc: item.imageSrc,
+                  backgroundColor: '#6BC5E8',
                 })
               }
             >
               <Text style={{ textAlign: 'center', fontWeight: 'bold' }}>Select</Text>
             </TouchableOpacity>
           </View>
-          <View>
-          {renderImage()}
-          </View>
+          <View>{renderImage()}</View>
         </View>
       </CustomCard>
     );
@@ -106,7 +104,7 @@ export const HomeScreen = () => {
           <FlatList
             data={transportData}
             renderItem={transportItem}
-            keyExtractor={(item) => item._id} // Use unique ID from server
+            keyExtractor={(item, index) => item._id || `${item.name}-${index}`} // Updated keyExtractor
           />
         )}
       </View>
